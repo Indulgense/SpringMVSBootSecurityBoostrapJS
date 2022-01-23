@@ -1,8 +1,17 @@
 package com.mf.spring.springmvsboot.dao;
 
 import com.mf.spring.springmvsboot.model.User;
-import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
 
 
-public interface UserDAO extends JpaRepository<User, Long> {
+public interface UserDAO {
+
+    List<User> getAllUser();
+    User getUserById(long id);
+    void createUser(User user);
+    void updateUser(long id, User updatedUser);
+    void deleteUser(long id);
+    User getUserByEmail(String email);
 }
+

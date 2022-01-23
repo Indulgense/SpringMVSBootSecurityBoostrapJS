@@ -2,47 +2,54 @@ package com.mf.spring.springmvsboot.service;
 
 import com.mf.spring.springmvsboot.dao.UserDAO;
 import com.mf.spring.springmvsboot.model.User;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
+@Transactional
 public class UserServiceImpl implements UserService{
 
     private final UserDAO userDAO;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserServiceImpl(UserDAO userDAO) {
+    public UserServiceImpl(UserDAO userDAO, PasswordEncoder passwordEncoder) {
         this.userDAO = userDAO;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
-    public void saveUser(User user) {
-        userDAO.save(user);
+    public List<User> getAllUser() {
+        return userDAO.getAllUser();
     }
 
     @Override
-    public void removeUserById(long id) {
-        userDAO.deleteById(id);
+    public User getUserById(long id) {
+        return userDAO.getUserById(id);
     }
 
     @Override
-    public List<User> getAllUsers() {
-        return userDAO.findAll();
+    public void createUser(User user) {
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        userDAO.createUser(user);
     }
 
     @Override
-    public User getUser(Long id) {
-        User user = null;
-        Optional<User> optional = userDAO.findById(id);
-        if (optional.isPresent()){
-            user = optional.get();
-        }
-        return user;
+    public void updateUser(long id, User updatedUser) {
+        if (updatedUser.getPassword() != "")
+            updatedUser.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
+        userDAO.updateUser(id, updatedUser);
     }
 
     @Override
-    public void updateUser(User updateUser) {
-        userDAO.save(updateUser);
+    public void deleteUser(long id) {
+        userDAO.deleteUser(id);
+    }
+
+    @Override
+    public User getUserByEmail(String email) {
+        return userDAO.getUserByEmail(email);
     }
 }
