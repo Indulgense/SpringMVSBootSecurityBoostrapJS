@@ -3,27 +3,26 @@ package com.mf.spring.springmvsboot.model;
 import org.springframework.security.core.GrantedAuthority;
 
 import javax.persistence.*;
-import java.util.HashSet;
 import java.util.Objects;
-import java.util.Set;
 
 
 @Entity
 @Table(name = "roles")
 public class Role implements GrantedAuthority {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
+    @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "role")
+    @Column(unique = true)
     private String role;
 
-    @ManyToMany(mappedBy = "roles")
-    Set<User> users;
-
     public Role() {
+    }
+
+    @Override
+    public String toString() {
+        return role.replaceAll("ROLE_", "") +"; ";
     }
 
     public Role(String role) {
@@ -46,21 +45,6 @@ public class Role implements GrantedAuthority {
         this.role = role;
     }
 
-    public Set<User> getUsers() {
-        return users;
-    }
-
-    public void setUsers(Set<User> users) {
-        this.users = users;
-    }
-
-    public void addUserToRoles(User user){
-        if (users==null){
-            users = new HashSet<>();
-        }
-        users.add(user);
-    }
-
     @Override
     public String getAuthority() {
         return getRole();
@@ -77,13 +61,5 @@ public class Role implements GrantedAuthority {
     @Override
     public int hashCode() {
         return Objects.hash(role);
-    }
-
-    @Override
-    public String toString() {
-        return "Role{" +
-                "id=" + id +
-                ", role='" + role + '\'' +
-                '}';
     }
 }

@@ -1,4 +1,4 @@
-package com.mf.spring.springmvsboot.config.handler;
+package com.mf.spring.springmvsboot.config;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.AuthorityUtils;
