@@ -1,7 +1,7 @@
 package com.mf.spring.springmvsboot.service;
 
 
-import com.mf.spring.springmvsboot.dao.RoleRepository;
+import com.mf.spring.springmvsboot.repository.RoleRepository;
 import com.mf.spring.springmvsboot.model.Role;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

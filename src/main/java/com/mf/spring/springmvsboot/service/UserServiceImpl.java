@@ -1,6 +1,6 @@
 package com.mf.spring.springmvsboot.service;
 
-import com.mf.spring.springmvsboot.dao.UserRepository;
+import com.mf.spring.springmvsboot.repository.UserRepository;
 import com.mf.spring.springmvsboot.model.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 
-@Service
+@Service("userDetailsServiceImpl")
 @Transactional
 public class UserServiceImpl implements UserService, UserDetailsService {
 

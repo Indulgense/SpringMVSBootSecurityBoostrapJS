@@ -1,4 +1,4 @@
-package com.mf.spring.springmvsboot.dao;
+package com.mf.spring.springmvsboot.repository;
 
 import com.mf.spring.springmvsboot.model.User;
 import org.springframework.data.repository.CrudRepository;
