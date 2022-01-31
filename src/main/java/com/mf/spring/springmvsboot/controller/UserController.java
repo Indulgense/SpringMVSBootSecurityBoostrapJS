@@ -7,10 +7,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 
 @Controller
 public class UserController {
@@ -22,63 +20,43 @@ public class UserController {
         this.userService = userService;
         this.roleService = roleService;
     }
-
-    @GetMapping("/index")
+    @GetMapping("/")
     public String getTestPage(){
-        return "index";
+        return "redirect:/login";
     }
 
     @GetMapping("/admin")
-    public String getListUsers(Model model){
+    public String getListUsers(@AuthenticationPrincipal UserDetails userDetails, Model model){
+        String name = userDetails.getUsername();
+        User user = userService.getByName(name);
+        model.addAttribute("user", user);
         model.addAttribute("userList", userService.getAllUser());
+        model.addAttribute("user1", new User());
+        model.addAttribute("roleList", roleService.getAllRoles());
         return "users";
     }
 
-    @GetMapping(value="/admin/add")
-    public String addUser(Model model){
-        model.addAttribute("user", new User());
-        model.addAttribute("roleList", roleService.getAllRoles());
-        return "addUser";
-    }
-
     @PostMapping(value="/admin/add")
-    public String saveUser(@ModelAttribute @Valid User user, BindingResult result,
-                           @RequestParam(value = "checked", required = false ) Long[] checked, Model model){
-        if(result.hasErrors()){
-            return "addUser";
-        }
+    public String saveUser(@ModelAttribute User user1,
+                           @RequestParam(value = "checked", required = false ) Long[] checked){
         if (checked == null) {
-            user.setOneRole(roleService.getRoleByName("ROLE_USER"));
-            userService.addUser(user);
+            user1.setOneRole(roleService.getRoleByName("USER"));
         } else {
             for (Long aLong : checked) {
                 if (aLong != null) {
-                    user.setOneRole(roleService.getRoleByID(aLong));
-                    userService.addUser(user);
+                    user1.setOneRole(roleService.getRoleByID(aLong));
                 }
             }
         }
-
+        userService.addUser(user1);
         return "redirect:/admin";
     }
 
-    @GetMapping(value="/admin/edit/{id}")
-    public String editUserPage(@PathVariable("id") long id, Model model) {
-        User user = userService.getUserById(id);
-        model.addAttribute("user", user);
-        model.addAttribute("roleList", roleService.getAllRoles());
-        return "editUser";
-    }
-    @PostMapping(value="/admin/edit/{id}")
-    public String updateUser(@PathVariable("id") long id, @Valid User user,
-                             BindingResult result,
-                             @RequestParam(value = "checked", required = false ) Long[] checked, Model model) {
-        if (result.hasErrors()) {
-            user.setId(id);
-            return "editUser";
-        }
+    @PatchMapping(value="/admin/edit/{id}")
+    public String updateUser(@ModelAttribute User user,
+                             @RequestParam(value = "checked", required = false ) Long[] checked) {
         if (checked == null) {
-            user.setOneRole(roleService.getRoleByName("ROLE_USER"));
+            user.setOneRole(roleService.getRoleByName("USER"));
             userService.updateUser(user);
         } else {
             for (Long aLong : checked) {
@@ -91,8 +69,8 @@ public class UserController {
         return "redirect:/admin";
     }
 
-    @GetMapping("/admin/delete/{id}")
-    public String deleteUser(@PathVariable("id") long id, Model model) {
+    @DeleteMapping("/delete/{id}")
+    public String getUserId(@PathVariable(value="id")Long id) {
         userService.deleteById(id);
         return "redirect:/admin";
     }
