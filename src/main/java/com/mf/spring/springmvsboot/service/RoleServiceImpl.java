@@ -8,8 +8,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Set;
 
-@Service
 @Transactional
+@Service
 public class RoleServiceImpl implements RoleService {
 
     private RoleRepository roleRepository;

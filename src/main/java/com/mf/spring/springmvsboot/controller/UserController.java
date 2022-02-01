@@ -16,10 +16,11 @@ public class UserController {
     private final UserService userService;
     private final RoleService roleService;
 
-    public UserController(UserService userService, RoleService roleService) {
+    public UserController (UserService userService, RoleService roleService) {
         this.userService = userService;
         this.roleService = roleService;
     }
+
     @GetMapping("/")
     public String getTestPage(){
         return "redirect:/login";
@@ -83,4 +84,5 @@ public class UserController {
         model.addAttribute("user", user);
         return "userPage";
     }
+
 }

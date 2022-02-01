@@ -30,9 +30,9 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
-    public void addUser(User user) {
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        userRepository.save(user);
+    public void addUser(User u) {
+        u.setPassword(passwordEncoder.encode(u.getPassword()));
+        userRepository.save(u);
     }
 
     @Override
@@ -46,19 +46,19 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
-    public void updateUser(User user) {
-        String passwordFromForm = user.getPassword();
-        String encodedPasswordFromBase = userRepository.findUserById(user.getId()).getPassword();
-        if(passwordFromForm.equals(encodedPasswordFromBase)) {
-            user.setPassword(encodedPasswordFromBase);
+    public void updateUser(User u) {
+        String passwordFromForm = u.getPassword();
+        String encodedPasswordFromBase = userRepository.findUserById(u.getId()).getPassword();
+        if(passwordFromForm.length() == 0 || passwordFromForm.equals(encodedPasswordFromBase)) {
+            u.setPassword(encodedPasswordFromBase);
         } else {
             if(passwordEncoder.matches(passwordFromForm, encodedPasswordFromBase)){
-                user.setPassword(encodedPasswordFromBase);
+                u.setPassword(encodedPasswordFromBase);
             } else {
-                user.setPassword(passwordEncoder.encode(passwordFromForm));
+                u.setPassword(passwordEncoder.encode(passwordFromForm));
             }
         }
-        userRepository.save(user);
+        userRepository.save(u);
     }
 
     @Override

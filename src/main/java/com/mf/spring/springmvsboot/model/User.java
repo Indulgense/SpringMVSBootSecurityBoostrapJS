@@ -4,9 +4,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotBlank;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Objects;
@@ -21,20 +18,15 @@ public class User implements UserDetails {
     private Long id;
 
     @Column(name = "Name", unique = true)
-    @NotBlank
     private String name;
 
     @Column(name = "Surname")
-    @NotBlank
     private String surname;
 
     @Column(name = "Age", nullable = false)
-    @Min(value = 1)
-    @Max(value = 110)
     private int age;
 
     @Column(name = "password", nullable = false)
-    @NotBlank
     private String pass;
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
@@ -115,6 +107,7 @@ public class User implements UserDetails {
                 ", name='" + name + '\'' +
                 ", surname='" + surname + '\'' +
                 ", age=" + age +
+                ", roles=" + roles +
                 '}';
     }
 
@@ -162,8 +155,7 @@ public class User implements UserDetails {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         User user = (User) o;
-        return age == user.age && id.equals(user.id) && name.equals(user.name) && surname.equals(user.surname) &&
-                pass.equals(user.pass) && Objects.equals(roles, user.roles);
+        return age == user.age && id.equals(user.id) && name.equals(user.name) && surname.equals(user.surname) && pass.equals(user.pass) && Objects.equals(roles, user.roles);
     }
 
     @Override
