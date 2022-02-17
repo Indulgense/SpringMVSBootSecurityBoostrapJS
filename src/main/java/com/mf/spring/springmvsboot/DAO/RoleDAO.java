@@ -1,11 +1,10 @@
-package com.mf.spring.springmvsboot.service;
+package com.mf.spring.springmvsboot.DAO;
 
 import com.mf.spring.springmvsboot.model.Role;
 
 import java.util.List;
 
-public interface RoleService {
-
+public interface RoleDAO {
     List<Role> getAllRoles();
 
     void saveRole(Role role);

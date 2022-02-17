@@ -1,59 +1,87 @@
 package com.mf.spring.springmvsboot.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 
 @Entity
-@Table(name = "users")
+@Table(name = "user")
 public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "Name", unique = true)
+    @Column(name = "name")
     private String name;
 
-    @Column(name = "Surname")
-    private String surname;
+    @Column(name = "username", unique = true)
+    private String username;
 
-    @Column(name = "Age", nullable = false)
-    private int age;
+    @Column(name = "password")
+    private String password;
 
-    @Column(name = "password", nullable = false)
-    private String pass;
+    @ManyToMany
+    @JoinTable(name = "users_roles"
+            , joinColumns = @JoinColumn(name = "user_id")
+            , inverseJoinColumns = @JoinColumn(name = "role_id"))
+    private Set<Role> roles = new HashSet<>();
 
-    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
-    @JoinTable(
-            name = "users_roles",
-            joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
-    private Set<Role> roles;
 
-    public void setPassword(String pass) {
-        this.pass = pass;
+    @Column(name = "phone")
+    private String phone;
+
+    @Column(name = "email")
+    private String email;
+
+    private boolean isAccountNonExpired;
+    private boolean isAccountNonLocked;
+    private boolean isCredentialsNonExpired;
+    private boolean isEnabled;
+
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 
     public User() {
+        this.isAccountNonExpired = true;
+        this.isAccountNonLocked = true;
+        this.isCredentialsNonExpired = true;
+        this.isEnabled = true;
     }
 
-    public User(String name, String surname, int age, String pass, Set<Role> roles) {
-        this(name, surname, age, pass);
-        this.roles = roles;
-    }
-
-    public User(String name, String surname, int age, String pass) {
+    public User(String name, String username, String password) {
+        this();
         this.name = name;
-        this.surname = surname;
-        this.age = age;
-        this.pass = pass;
+        this.username = username;
+        this.password = password;
+    }
 
+    public User(String name, String username, String password, String phone, String email) {
+        this(name, username, password);
+        this.phone = phone;
+        this.email = email;
+    }
+
+    public User addRoleToUser(Role role) {
+        this.roles.add(role);
+        return this;
+    }
+
+    public User addRolesToUser(Role... role) {
+        this.roles.addAll(Arrays.asList(role));
+        return this;
     }
 
     public String getName() {
@@ -64,102 +92,90 @@ public class User implements UserDetails {
         this.name = name;
     }
 
-    public String getSurname() {
-        return surname;
+    public String getEmail() {
+        return email;
     }
 
-    public void setSurname(String surname) {
-        this.surname = surname;
-    }
-
-    public int getAge() {
-        return age;
-    }
-
-    public Set<Role> setOneRole(Role r) {
-        if (roles == null) {
-            roles = new HashSet<>();
-        }
-        roles.add(r);
-        return roles;
-    }
-
-    public Set<Role> getRoles() {
-        return roles;
-    }
-
-    public void setRoles(Set<Role> roles) {
-        this.roles = roles;
-    }
-
-    public void setAge(int age) {
-        this.age = age;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public Long getId() {
         return id;
     }
 
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+
     @Override
     public String toString() {
         return "User{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
-                ", surname='" + surname + '\'' +
-                ", age=" + age +
+                ", username='" + username + '\'' +
+                ", password='" + password + '\'' +
                 ", roles=" + roles +
+                ", phone='" + phone + '\'' +
+                ", email='" + email + '\'' +
                 '}';
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public void setRoles(Set<Role> roles) {
+        this.roles = roles;
+    }
+
+    public Set<Role> getRoles() {
+        return roles;
     }
 
     @Override
+    @JsonIgnore
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return getRoles();
+        return roles;
     }
 
     @Override
     public String getPassword() {
-        return pass;
+        return password;
     }
 
     @Override
     public String getUsername() {
-        return name;
+        return username;
     }
 
     @Override
+    @JsonIgnore
     public boolean isAccountNonExpired() {
-        return true;
+        return isAccountNonExpired;
     }
 
     @Override
+    @JsonIgnore
     public boolean isAccountNonLocked() {
-        return true;
+        return isAccountNonLocked;
     }
 
     @Override
+    @JsonIgnore
     public boolean isCredentialsNonExpired() {
-        return true;
+        return isCredentialsNonExpired;
     }
 
     @Override
+    @JsonIgnore
     public boolean isEnabled() {
-        return true;
+        return isEnabled;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        User user = (User) o;
-        return age == user.age && id.equals(user.id) && name.equals(user.name) && surname.equals(user.surname) && pass.equals(user.pass) && Objects.equals(roles, user.roles);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, name, surname, age, pass, roles);
-    }
 }

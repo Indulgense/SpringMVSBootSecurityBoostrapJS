@@ -1,40 +1,48 @@
 package com.mf.spring.springmvsboot.service;
 
-
-import com.mf.spring.springmvsboot.repository.RoleRepository;
+import com.mf.spring.springmvsboot.DAO.RoleDAO;
 import com.mf.spring.springmvsboot.model.Role;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
-import java.util.Set;
+import javax.transaction.Transactional;
+import java.util.List;
 
-@Transactional
-@Service
-public class RoleServiceImpl implements RoleService {
+@Repository
+public class RoleServiceImpl implements RoleService{
 
-    private RoleRepository roleRepository;
 
-    public RoleServiceImpl(RoleRepository roleRepository) {
-        this.roleRepository = roleRepository;
+    private final RoleDAO roleDAO;
+
+    @Autowired
+    public RoleServiceImpl(RoleDAO roleDAO) {
+        this.roleDAO = roleDAO;
     }
 
     @Override
-    public Set<Role> getAllRoles() {
-        return roleRepository.findAll();
+    public List<Role> getAllRoles() {
+        return roleDAO.getAllRoles();
     }
 
     @Override
-    public Role getRoleByID(Long id) {
-        return roleRepository.findRoleById(id);
+    @Transactional
+    public void saveRole(Role role) {
+        roleDAO.saveRole(role);
+    }
+
+    @Override
+    public Role getRole(Long id) {
+        return roleDAO.getRole(id);
     }
 
     @Override
     public Role getRoleByName(String name) {
-        return roleRepository.findRoleByRole(name);
+        return roleDAO.getRoleByName(name);
     }
 
     @Override
-    public void addRole(Role role) {
-        roleRepository.save(role);
+    @Transactional
+    public void deleteRole(Long id) {
+        roleDAO.deleteRole(id);
     }
 }

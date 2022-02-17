@@ -1,32 +1,55 @@
 package com.mf.spring.springmvsboot.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.mf.spring.springmvsboot.database.StandartRoles;
 import org.springframework.security.core.GrantedAuthority;
 
 import javax.persistence.*;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 @Entity
-@Table(name = "roles")
+@Table(name = "role")
 public class Role implements GrantedAuthority {
 
+
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true)
+    @Column(name = "role", unique = true)
     private String role;
 
-    public Role() {
+    @JsonIgnore
+    @ManyToMany(mappedBy = "roles")
+    private Set<User> users = new HashSet<>();
+
+    public Role() {}
+
+
+    public Role(StandartRoles standartRole){
+        this.role = standartRole.name();
     }
 
-    @Override
-    public String toString() {
-        return role;
-    }
-
-    public Role(String role) {
+    public Role(Long id, String role) {
+        this.id = id;
         this.role = role;
+    }
+
+
+    public void addUserToRole(User user){
+        users.add(user);
+    }
+
+    public void addUsersToRole(User ... user){
+        users.addAll(Arrays.asList(user));
+    }
+
+    public Set<User> getUsers() {
+        return users;
     }
 
     public Long getId() {
@@ -38,7 +61,7 @@ public class Role implements GrantedAuthority {
     }
 
     public String getRole() {
-        return role;
+        return this.role;
     }
 
     public void setRole(String role) {
@@ -46,8 +69,14 @@ public class Role implements GrantedAuthority {
     }
 
     @Override
+    @JsonIgnore
     public String getAuthority() {
-        return getRole();
+        return role;
+    }
+
+    @Override
+    public String toString() {
+        return role;
     }
 
     @Override
@@ -55,7 +84,7 @@ public class Role implements GrantedAuthority {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Role role1 = (Role) o;
-        return role.equals(role1.role);
+        return Objects.equals(role, role1.role);
     }
 
     @Override

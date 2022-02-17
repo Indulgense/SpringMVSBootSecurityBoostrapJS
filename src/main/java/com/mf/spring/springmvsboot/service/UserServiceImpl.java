@@ -1,77 +1,96 @@
 package com.mf.spring.springmvsboot.service;
 
-import com.mf.spring.springmvsboot.repository.UserRepository;
+import com.mf.spring.springmvsboot.DAO.UserDAO;
 import com.mf.spring.springmvsboot.model.User;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityNotFoundException;
+import javax.persistence.NoResultException;
+import javax.persistence.NonUniqueResultException;
+import java.util.Arrays;
 import java.util.List;
-
+import java.util.Objects;
 
 @Service
-@Transactional
 public class UserServiceImpl implements UserService, UserDetailsService {
 
-    private final UserRepository userRepository;
+    private final UserDAO userDAO;
     private final PasswordEncoder passwordEncoder;
 
-    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
+    @Autowired
+    public UserServiceImpl(UserDAO userDAO, PasswordEncoder passwordEncoder) {
+        this.userDAO = userDAO;
         this.passwordEncoder = passwordEncoder;
     }
 
     @Override
-    public List<User> getAllUser() {
-        return userRepository.findAll();
+    public List<User> getAllUsers() {
+        return userDAO.getAllUsers();
     }
 
     @Override
-    public void addUser(User u) {
-        u.setPassword(passwordEncoder.encode(u.getPassword()));
-        userRepository.save(u);
-    }
+    @Transactional
+    public void saveUser(User user) {
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
 
-    @Override
-    public void deleteById(Long id) {
-        userRepository.deleteById(id);
-    }
-
-    @Override
-    public User getUserById(Long id) {
-        return userRepository.findUserById(id);
-    }
-
-    @Override
-    public void updateUser(User u) {
-        String passwordFromForm = u.getPassword();
-        String encodedPasswordFromBase = userRepository.findUserById(u.getId()).getPassword();
-        if(passwordFromForm.length() == 0 || passwordFromForm.equals(encodedPasswordFromBase)) {
-            u.setPassword(encodedPasswordFromBase);
-        } else {
-            if(passwordEncoder.matches(passwordFromForm, encodedPasswordFromBase)){
-                u.setPassword(encodedPasswordFromBase);
-            } else {
-                u.setPassword(passwordEncoder.encode(passwordFromForm));
+        try {
+            if (userDAO.getUserByUsername(user.getUsername()) != null) {
+                throw new NonUniqueResultException("Ошибка. Username '" + user.getUsername() + "' уже занят.");
             }
+        } catch (EmptyResultDataAccessException | NoResultException ignored) {
         }
-        userRepository.save(u);
+        userDAO.saveUser(user);
     }
 
     @Override
-    public User getByName(String name) {
-        return userRepository.findUserByName(name);
+    @Transactional
+    public void updateUser(User user) {
+        User daouser;
+        Long daouserId;
+
+        try {
+            daouser = userDAO.getUserByUsername(user.getUsername());
+            daouserId = daouser.getId();
+            if (!Objects.equals(daouserId, user.getId())) {
+                throw new NonUniqueResultException("Ошибка.Username '" + user.getUsername() +  "' уже занят.");
+            }
+        } catch (EmptyResultDataAccessException | NoResultException ignored) {
+        }
+
+        if (user.getPassword() != null && !user.getPassword().isEmpty()) {
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
+        } else {
+            user.setPassword(getUser(user.getId()).getPassword());
+        }
+        userDAO.updateUser(user);
     }
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        UserDetails user = userRepository.findUserByName(username);
-        if (user == null) {
-            throw new UsernameNotFoundException("Could not find user with that name");
-        }
-        return user;
+    @Transactional
+    public void saveUsers(User... user) {
+        Arrays.stream(user).forEach(this::saveUser);
+    }
+
+    @Override
+    @Transactional
+    public User getUser(Long id) {
+        return userDAO.getUser(id);
+    }
+
+    @Override
+    @Transactional
+    public void deleteUser(Long id) throws EntityNotFoundException {
+        userDAO.deleteUser(id);
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) {
+        return userDAO.getUserByUsername(username);
     }
 }
